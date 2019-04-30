@@ -1,0 +1,30 @@
+apiVersion: skaffold/v1beta2
+kind: Config
+build:
+  artifacts:
+  - image: changeme
+    context: .
+    docker: {}
+  tagPolicy:
+    envTemplate:
+      template: '{{.DOCKER_REGISTRY}}/dvaletin/micro-go-quickstart:{{.VERSION}}'
+  local: {}
+deploy:
+  kubectl: {}
+profiles:
+- name: dev
+  build:
+    artifacts:
+    - docker: {}
+    tagPolicy:
+      envTemplate:
+        template: '{{.DOCKER_REGISTRY}}/dvaletin/micro-go-quickstart:{{.DIGEST_HEX}}'
+    local: {}
+  deploy:
+    helm:
+      releases:
+      - name: micro-go-quickstart
+        chartPath: charts/micro-go-quickstart
+        setValueTemplates:
+          image.repository: '{{.DOCKER_REGISTRY}}/dvaletin/micro-go-quickstart'
+          image.tag: '{{.DIGEST_HEX}}'
